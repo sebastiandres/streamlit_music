@@ -62,7 +62,7 @@ def create_chord_diagram(chord_name, fret_positions,
     plt.tight_layout()
     if savefig:
         image_filepath = join("chord_images", f"{chord_name}.png")
-        plt.savefig(image_filepath, bbox_inches='tight', pad_inches=0, transparent=True)
+        plt.savefig(image_filepath, bbox_inches='tight', pad_inches=0, transparent=False)
     if show_fig:
         plt.show()
     plt.close()
