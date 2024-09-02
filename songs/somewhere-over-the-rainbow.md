@@ -1,3 +1,8 @@
+[properties]
+pattern = "↑↓↑↓↑↓↑↓"
+beats = 3
+seconds = 6.0
+[song]
 [C] Somewhere [Em] over the rainbow
 [F] Way up [C] high
 [F] And the [C] dreams that you dreamed of

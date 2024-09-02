@@ -1,3 +1,8 @@
+[properties]
+pattern = "↓-↓-↓-↓-"
+beats = 4
+seconds = 3.2
+[song]
 [C] I wanna be a billionaire so 
 [E7] fricking bad
 [Am] buy all of the things I never 
