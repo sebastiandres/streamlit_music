@@ -44,16 +44,28 @@ def remove_top_margin():
     }
     </style>
     <script>
-    document.addEventListener("orientationchange", function(event){
-    switch(window.orientation) 
-    {  
-        case -90: case 90:
-            /* Device is in landscape mode */
-            break; 
-        default:
-            /* Device is in portrait mode */
-            }
-        });
+    // Force landscape orientation
+    function forceLandscape() {
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(function(error) {
+                console.log("Orientation lock failed: " + error);
+            });
+        } else if (screen.lockOrientation) {
+            screen.lockOrientation('landscape');
+        } else if (screen.mozLockOrientation) {
+            screen.mozLockOrientation('landscape');
+        } else if (screen.msLockOrientation) {
+            screen.msLockOrientation('landscape');
+        }
+    }
+
+    // Call forceLandscape initially
+    forceLandscape();
+
+    // Listen for orientation changes and force landscape again
+    window.addEventListener("orientationchange", function() {
+        forceLandscape();
+    });
     </script>
     """
     st.markdown(html_code, unsafe_allow_html=True)
@@ -66,23 +78,38 @@ def go_full_screen():
     html_code = """
     <script>
         function goFullscreen() {
-            var element = document.documentElement;
-            if (element.requestFullscreen) {
-                element.requestFullscreen();
-            } else if (element.mozRequestFullScreen) {
-                element.mozRequestFullScreen();
-            } else if (element.webkitRequestFullscreen) {
-                element.webkitRequestFullscreen();
-            } else if (element.msRequestFullscreen) {
-                element.msRequestFullscreen();
+            var elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
             }
-            
+
+            // Hide browser navigation bar
+            if (document.body.style.cursor) {
+                document.body.style.cursor = 'none';
+            }
+            if (window.navigator.standalone !== true) {
+                // For iOS Safari
+                window.scrollTo(0, 1);
+            }
+
+            // Force landscape orientation
             screen.orientation.lock("landscape").catch(function(error) {
                 console.log("Orientation lock failed: " + error);
             });
         }
-        
+
+        // Attempt to go fullscreen immediately
         goFullscreen();
+
+        // Also attempt when user interacts with the page
+        document.addEventListener('click', goFullscreen);
+        document.addEventListener('touchstart', goFullscreen);
     </script>
 """
     st.markdown(html_code, unsafe_allow_html=True)
@@ -124,13 +151,13 @@ links = song_data[5:song_start-1]
 # Read the chords
 song_chords_data = song_data[song_start:]
 # Show the properties
-time_per_line = st.sidebar.number_input("Time per line [seconds]", 
-                                min_value=0.0, max_value=10.0, 
-                                value=default_seconds, step=0.1
-                                )
-n_beats = st.sidebar.number_input("Beats per second", 
-                                min_value=0, max_value=10, 
+beats_per_line = st.sidebar.number_input("Beats per line", 
+                                min_value=1, max_value=10, 
                                 value=default_beats, step=1
+                                )
+seconds_per_beat = st.sidebar.number_input("Seconds per beat", 
+                                min_value=0.1, max_value=5.0, 
+                                value=default_seconds, step=0.1
                                 )
 beep_sound = st.sidebar.checkbox("Beep sound", value=False)
 sc1, sc2 = st.sidebar.columns(2)
@@ -138,7 +165,7 @@ start_song = sc1.button("Start song", on_click=start_button_on_click)
 stop_song = sc2.button("Stop song", on_click=expand_sidebar)
 
 beep_duration = 0.1 # seconds
-pause_duration = time_per_line/n_beats - beep_duration
+pause_duration = seconds_per_beat - beep_duration
 
 song_title = song_file_selected.split("/")[-1].split(".")[0]
 song_title = song_title.replace("_", " ").replace("-", " ").title()
@@ -174,7 +201,7 @@ if start_song:
             # Update the right pane
             update_chords_panel(current_line, chords_ph)
             # Wait to update again
-            for _ in range(n_beats):
+            for _ in range(beats_per_line):
                 time.sleep(pause_duration)
                 if beep_sound:
                     print('\a')

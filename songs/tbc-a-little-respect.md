@@ -1,7 +1,7 @@
 [properties]
 pattern = "↑↓↑↓↑↓↑↓"
-beats = 3
-seconds = 6.0
+beats_per_line = 4
+seconds_per_beat = 0.75
 [song]
 [C] I try to discover
 [G] A little something to make me sweeter

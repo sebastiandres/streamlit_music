@@ -1,7 +1,7 @@
 [properties]
 pattern = "↓-↓-↓-↓-"
-beats = 4
-seconds = 3.2
+beats_per_line = 4
+seconds_per_beat = 1.0
 [links]
 https://www.youtube.com/watch?v=W6XEdlpirvw
 [song]

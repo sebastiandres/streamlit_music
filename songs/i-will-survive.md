@@ -1,7 +1,7 @@
 [properties]
-pattern = " ↓ ↑ ↓ "
-beats = 3
-seconds = 6.0
+pattern = "↓ ↑ ↓ ."
+beats_per_line = 4
+seconds_per_beat = 1.0
 [links]
 https://www.youtube.com/watch?v=Bf0a1Ilcb34
 https://www.youtube.com/watch?v=LJ7Bkg7in9Q
