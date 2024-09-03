@@ -74,11 +74,17 @@ def remove_top_margin():
 def go_full_screen():
     """ 
     This function is used to go full screen.
+    It targets the element with id 'root' and attempts to enter fullscreen mode.
     """
     html_code = """
     <script>
         function goFullscreen() {
-            var elem = document.documentElement;
+            var elem = document.getElementById('root');
+            if (!elem) {
+                console.error("Element with id 'root' not found");
+                return;
+            }
+            
             if (elem.requestFullscreen) {
                 elem.requestFullscreen();
             } else if (elem.webkitRequestFullscreen) {
@@ -99,13 +105,15 @@ def go_full_screen():
             }
 
             // Force landscape orientation
-            screen.orientation.lock("landscape").catch(function(error) {
-                console.log("Orientation lock failed: " + error);
-            });
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock("landscape").catch(function(error) {
+                    console.log("Orientation lock failed: " + error);
+                });
+            }
         }
 
-        // Attempt to go fullscreen immediately
-        goFullscreen();
+        // Attempt to go fullscreen when the page loads
+        document.addEventListener('DOMContentLoaded', goFullscreen);
 
         // Also attempt when user interacts with the page
         document.addEventListener('click', goFullscreen);
