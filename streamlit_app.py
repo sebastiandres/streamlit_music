@@ -78,46 +78,27 @@ def go_full_screen():
     """
     html_code = """
     <script>
-        function goFullscreen() {
-            var elem = document.getElementById('root');
-            if (!elem) {
-                console.error("Element with id 'root' not found");
-                return;
-            }
-            
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.mozRequestFullScreen) {
-                elem.mozRequestFullScreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
-            }
+        /* Get the documentElement (<html>) to display the page in fullscreen */
+        var elem = document.documentElement;
 
-            // Hide browser navigation bar
-            if (document.body.style.cursor) {
-                document.body.style.cursor = 'none';
-            }
-            if (window.navigator.standalone !== true) {
-                // For iOS Safari
-                window.scrollTo(0, 1);
-            }
-
-            // Force landscape orientation
-            if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock("landscape").catch(function(error) {
-                    console.log("Orientation lock failed: " + error);
-                });
-            }
+        /* View in fullscreen */
+        function openFullscreen() {
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+        }
         }
 
-        // Attempt to go fullscreen when the page loads
-        document.addEventListener('DOMContentLoaded', goFullscreen);
+        // Attempt to go fullscreen immediately
+        openFullscreen();
 
-        // Also attempt when user interacts with the page
-        document.addEventListener('click', goFullscreen);
-        document.addEventListener('touchstart', goFullscreen);
+        // Listen for orientation changes and go fullscreen again
+        window.addEventListener("orientationchange", function() {
+            openFullscreen();
+        });
     </script>
 """
     st.markdown(html_code, unsafe_allow_html=True)
