@@ -2,6 +2,8 @@
 pattern = "↓-↓-↓-↓-"
 beats = 4
 seconds = 3.2
+[links]
+https://www.youtube.com/watch?v=W6XEdlpirvw
 [song]
 [C] I wanna be a billionaire so 
 [E7] fricking bad

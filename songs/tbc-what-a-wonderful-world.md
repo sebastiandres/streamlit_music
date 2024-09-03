@@ -2,10 +2,6 @@
 pattern = "↑↓↑↓↑↓↑↓"
 beats = 3
 seconds = 6.0
-[links]
-https://www.youtube.com/watch?v=VqFnIDxH2dU
-https://www.youtube.com/watch?v=m4P9x6hziXM
-https://www.youtube.com/watch?v=iN-jppBo7zI
 [song]
 [C] Somewhere [Em] over the rainbow
 [F] Way up [C] high

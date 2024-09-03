@@ -25,7 +25,7 @@ def update(current_line, chords_ph):
     # options: [*]
     current_chords_regex = r"\[(.*?)\]"
     current_chords = re.findall(current_chords_regex, current_line)
-    print(current_chords)
+    #print(current_chords)
     # Show the chords in panels
     N_PANELS = 2
     chords_ph.empty()

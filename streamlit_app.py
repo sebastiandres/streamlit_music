@@ -6,6 +6,8 @@ import time
 from helpers.song_panel import update as update_song_panel
 from helpers.chords_panel import update as update_chords_panel
 
+DEBUG = True
+
 if 'sidebar_state' not in st.session_state:
     ss.sidebar_state = 'expanded'
 
@@ -20,24 +22,42 @@ def collapse_sidebar():
 def expand_sidebar():
     ss.sidebar_state = 'expanded'
 
+def pretty_song_name(song_path):
+    song_name = song_path.split("/")[-1].split(".")[0]
+    return song_name.replace("_", " ").replace("-", " ").title()
+
 # Get the list of all the songs
 song_files = sorted(glob.glob("songs/*.md"))
+
+song_list = {}
+for song_file in song_files:
+    if DEBUG and "0-test" not in song_file and "tbc" not in song_file:
+        song_name = pretty_song_name(song_file)
+        song_list[song_name] = song_file
 
 # Columns
 c1, c2, c3 = st.columns([4,1,1])
 # Create a dropdown to select the song
 st.sidebar.header("StrumLit")
-song = st.sidebar.selectbox("Select a song", song_files)
-
+song_name_selected = st.sidebar.selectbox("Select a song", song_list)
+song_file_selected = song_list[song_name_selected]
 # Read the song file
-with open(song, "r") as file:
+with open(song_file_selected, "r") as file:
     song_data = file.readlines()
+# Find the line that has [song]
+song_start = -1
+for i, line in enumerate(song_data):
+    if "[song]" in line:
+        song_start = i+1
 # Read the properties
 pattern = song_data[1].split(" = ")[1].strip().replace('"','').replace("'", "")
 default_beats = int(song_data[2].split(" = ")[1].strip())
 default_seconds = float(song_data[3].split(" = ")[1].strip())
-song_chords_data = song_data[5:]
-
+# Read the links
+links = song_data[5:song_start-1]
+# Read the chords
+song_chords_data = song_data[song_start:]
+# Show the properties
 time_per_line = st.sidebar.number_input("Time per line [seconds]", 
                                 min_value=0.0, max_value=10.0, 
                                 value=default_seconds, step=0.1
@@ -54,10 +74,16 @@ stop_song = sc2.button("Stop song", on_click=expand_sidebar)
 beep_duration = 0.1 # seconds
 pause_duration = time_per_line/n_beats - beep_duration
 
-song_title = song.split("/")[-1].split(".")[0]
+song_title = song_file_selected.split("/")[-1].split(".")[0]
 song_title = song_title.replace("_", " ").replace("-", " ").title()
 st.title(song_title)
 
+# Add an expander for the links, which opens a new tab
+with st.expander("Links"):
+    links_md_list = []
+    for link in links:
+        links_md_list.append(f"[{link}]({link})")
+    st.markdown("* " + "\n * ".join(links_md_list))
 body_ph = st.empty()
 body_ph.markdown("  \n".join(song_chords_data))
 
