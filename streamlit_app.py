@@ -26,6 +26,72 @@ def pretty_song_name(song_path):
     song_name = song_path.split("/")[-1].split(".")[0]
     return song_name.replace("_", " ").replace("-", " ").title()
 
+def start_button_on_click():
+    collapse_sidebar()
+    go_full_screen()
+
+def remove_top_margin():
+    """ 
+    This function is used to go full screen.
+    """
+    html_code = """
+    <style>
+    .block-container
+    {
+        padding-top: 0.1rem;
+        padding-bottom: 0rem;
+        margin-top: 0.1rem;
+    }
+    </style>
+    <script>
+    document.addEventListener("orientationchange", function(event){
+    switch(window.orientation) 
+    {  
+        case -90: case 90:
+            /* Device is in landscape mode */
+            break; 
+        default:
+            /* Device is in portrait mode */
+            }
+        });
+    </script>
+    """
+    st.markdown(html_code, unsafe_allow_html=True)
+    return     
+
+def go_full_screen():
+    """ 
+    This function is used to go full screen.
+    """
+    html_code = """
+    <script>
+        function goFullscreen() {
+            var element = document.documentElement;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+            
+            screen.orientation.lock("landscape").catch(function(error) {
+                console.log("Orientation lock failed: " + error);
+            });
+        }
+        
+        goFullscreen();
+    </script>
+"""
+    st.markdown(html_code, unsafe_allow_html=True)
+    return 
+
+
+# Remove top margin
+remove_top_margin()
+
 # Get the list of all the songs
 song_files = sorted(glob.glob("songs/*.md"))
 
@@ -68,7 +134,7 @@ n_beats = st.sidebar.number_input("Beats per second",
                                 )
 beep_sound = st.sidebar.checkbox("Beep sound", value=False)
 sc1, sc2 = st.sidebar.columns(2)
-start_song = sc1.button("Start song", on_click=collapse_sidebar)
+start_song = sc1.button("Start song", on_click=start_button_on_click)
 stop_song = sc2.button("Stop song", on_click=expand_sidebar)
 
 beep_duration = 0.1 # seconds
