@@ -4,7 +4,6 @@ beats = 3
 seconds = 6.0
 [song]
 [C]Igual que el mosquito mas [G]tonto de la [Am]manada [G]
-[C]Igual que el mosquito mas [G]tonto de la [Am]manada [G]
 [F]yo sigo tu luz [G]aunque me lleve a [C]morir [Csus] [C]
 [E]te sigo como les siguen los [Am]puntos [G]finales
 [F]a todas las frases sui[G]cidas que buscan su [C]fin [Csus] [C]
