@@ -38,12 +38,10 @@ notes = {
     "  G  ": 783.99,
 }
 
-def freq(file, start_time, end_time, min_freq=100, max_freq=800):
+def freq(file, start_index, end_index, min_freq=100, max_freq=800):
     """
     This function takes a wav file and returns the frequency spectrum of the audio.
     file: the wav file to read
-    start_time: the start time of the audio to read (in milliseconds)
-    end_time: the end time of the audio to read (in milliseconds)
     """
     # Open the file and convert to mono
     sr, data = wavfile.read(file)
@@ -53,7 +51,7 @@ def freq(file, start_time, end_time, min_freq=100, max_freq=800):
         pass
 
     # Return a slice of the data from start_time to end_time
-    dataToRead = data[int(start_time * sr / 1000) : int(end_time * sr / 1000) + 1]
+    dataToRead = data[start_index : end_index]
 
     # Fourier Transform
     N = len(dataToRead)
@@ -67,8 +65,8 @@ def freq(file, start_time, end_time, min_freq=100, max_freq=800):
     return xf, yf
 
 
-def plot_spectrogram(xf, yf, fig_ph):
-    fig = plt.figure(figsize=(10, 5))
+def plot_spectrogram(xf, yf, fig_ph, t=0):
+    fig = plt.figure(figsize=(10, 3.5))
     # Plot the spectrogram
     ax = fig.add_subplot(111)
     yf_norm = np.abs(yf) / np.max(np.abs(yf))
@@ -80,35 +78,52 @@ def plot_spectrogram(xf, yf, fig_ph):
         ax.text(freq, 1.0, note, color=color, fontsize=12, alpha=0.5, ha='center')
     # Display in log scale
     ax.set_xscale('log')
+    ax.set_title(f"Time: {t:.2f} s")
+    ax.set_xlabel("Frequency (Hz)")
+    ax.set_ylabel("Amplitude (relative)")
     fig_ph.pyplot(fig)
     return
 
+
 def page_content():
     st.title("Spectrometer")
-    c1, c2 = st.columns(2)
     # Capture the audio
-    audio_file = c1.audio_input("Press here to record")
+    audio_file = st.audio_input("Press here to record")
     # Play de audio
     if audio_file: # audio/wav
+        # Get the data info
+        sr, data = wavfile.read(audio_file)
+        # Compute how many milliseconds are in the audio file
+        total_seconds = len(data) / sr
+        N = len(data)
+        # Show buttons    
+        c1, c2 = st.columns(2)
+        with c1.container(border=True):
+            show_all_button = c1.button("Animated", use_container_width=True)
+            step_size = c1.number_input("Step size (s)", value=0.25, min_value=0.10, max_value=total_seconds/2, step=0.1)
+        with c2.container(border=True):
+            use_params_button = c2.button("Fixed", use_container_width=True)
+            c21, c22 = c2.columns(2)
+            init_time = c21.number_input("Initial time (s)", value=0.5, min_value=0.0, max_value=total_seconds, step=0.1)
+            window_size = c22.number_input("Window size (s)", value=0.5, min_value=0.5, max_value=total_seconds/2, step=0.1)
+        fig_ph = st.empty()
         # Play the audio
-        if c2.button("Analyze"):
-            # Get the sample rate and data
-            sr, data = wavfile.read(audio_file)
-            # Compute how many milliseconds are in the audio file
-            total_seconds = len(data) / sr
+        if show_all_button:
             # Get the spectrogram
-            ms = 1000.0
-            fig_ph = st.empty()
-            for i in np.arange(0.0, total_seconds, 1):
-                xf, yf = freq(audio_file, i*ms, (i+1)*ms)
-                plot_spectrogram(xf, yf, fig_ph)
+            delta = 2*int(step_size*sr)
+            for i in np.arange(0.0, N, int(step_size*sr)):
+                min_index = int(max(0, i-delta))
+                max_index = int(min(N, i+delta))
+                xf, yf = freq(audio_file, min_index, max_index)
+                plot_spectrogram(xf, yf, fig_ph, t=i/sr)
                 time.sleep(1)
-        # Display the spectrogram
-        #st.write(xf, yf)
-        # 
-        #fig = ridge_plot()
-        #st.pyplot(fig)
-
+        # Show with fixed parameters
+        if use_params_button:
+            # Get the spectrogram
+            start_index = int(max(0, init_time*sr-window_size*sr))
+            end_index = int(min(N, init_time*sr+window_size*sr))
+            xf, yf = freq(audio_file, start_index, end_index)
+            plot_spectrogram(xf, yf, fig_ph, t=init_time)
 
 
 page_content()
